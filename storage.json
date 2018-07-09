@@ -1,0 +1,86 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "accountType": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Standard_ZRS",
+                "Premium_LRS"
+            ]
+        },
+        "accessTier": {
+            "type": "string",
+            "allowedValues": [
+                "Cool",
+                "Hot"
+            ]
+        },
+        "storageTagValues": {
+            "type": "object",
+            "defaultValue": {
+            "dataclassfication": "xxx",
+            "chargecode": "xxx",
+            "businessowner": "xxx",
+            "techowner": "xxx",
+            "environment": "xxx",
+            "managedby": "xxx",
+            "riskdomain": "xxx"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "resourceGroup",
+            "allowedValues": [
+                "resourceGroup",
+                "eastus",
+                "northcentralus",
+                "southcentralus"
+            ]
+        },
+        "kind": {
+            "type": "string",
+            "defaultValue": "BlobStorage",
+            "allowedValues": [
+                "BlobStorage",
+                "StorageV2",
+                "Storage"
+            ]
+        }
+    },
+    "variables": {
+        "storageLocation": "[if(equals(parameters('location'), 'resourceGroup'), resourceGroup().location, parameters('location'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2017-10-01",
+            "name": "[parameters('name')]",
+            "location": "[variables('storageLocation')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "tags": "[parameters('storageTagValues')]",
+            "sku": {
+                "name": "[parameters('accountType')]"
+            },
+            "kind": "[parameters('kind')]",
+            "properties": {
+                "accessTier": "[parameters('accessTier')]",
+                "encryption": {
+                    "services": {
+                        "blob": {
+                            "enabled": true
+                        },
+                        "file": null
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "supportsHttpsTrafficOnly": "true"
+            }
+        }
+    ]
+}
